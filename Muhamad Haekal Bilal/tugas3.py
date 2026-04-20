@@ -2,55 +2,55 @@ import streamlit as st
 import time
 
 class Node:
-    def _init_(self, warna, durasi, emoji):
+    def __init__(self, warna, durasi):
         self.warna = warna
         self.durasi = durasi
-        self.emoji = emoji 
         self.next = None
 
-class CircularLinkedList:
-    def _init_(self):
-        self.head = None
+def inisialisasi_list():
+    merah = Node("Merah", 40)
+    kuning = Node("Kuning", 5)
+    hijau = Node("Hijau", 20)
 
-    def tambah_lampu(self, warna, durasi, emoji):
-        node_baru = Node(warna, durasi, emoji)
-        
-        if self.head is None:
-            self.head = node_baru
-            node_baru.next = self.head
-        else:
-            temp = self.head
-            while temp.next != self.head:
-                temp = temp.next
-            
-            temp.next = node_baru
-            node_baru.next = self.head
+    merah.next = kuning
+    kuning.next = hijau
+    hijau.next = merah
 
-st.title("Simulasi Lampu Lalu Lintas")
-st.write("Menggunakan Circular Linked List")
+    return merah
 
-if 'lampu_lalu_lintas' not in st.session_state:
-    lampu = CircularLinkedList()
-    lampu.tambah_lampu("MERAH", 40, "🔴")
-    lampu.tambah_lampu("HIJAU", 20, "🟢")
-    lampu.tambah_lampu("KUNING", 5, "🟡")
-    st.session_state.lampu_lalu_lintas = lampu
+def main():
+    st.title("🚦 Simulasi Lampu Lalu Lintas")
+    st.write("Menggunakan Singly Circular Linked List")
 
-tombol_mulai = st.button("Mulai Simulasi")
+    if "simpul_aktif" not in st.session_state:
+        st.session_state.simpul_aktif = inisialisasi_list()
+        st.session_state.waktu = st.session_state.simpul_aktif.durasi
 
-tempat_lampu = st.empty()
-tempat_waktu = st.empty()
+    simpul = st.session_state.simpul_aktif
 
-if tombol_mulai:
-    bantu = st.session_state.lampu_lalu_lintas.head
-    
-   
-    while True:
-        
-        tempat_lampu.markdown(f"## {bantu.emoji} Lampu {bantu.warna} Menyala!")
-        
-        for sisa in range(bantu.durasi, 0, -1):
-            tempat_waktu.subheader(f"Sisa waktu: {sisa} detik")
-            time.sleep(1) 
+    if simpul.warna == "Merah":
+        st.error(f"🔴 LAMPU {simpul.warna.upper()}")
+    elif simpul.warna == "Kuning":
+        st.warning(f"🟡 LAMPU {simpul.warna.upper()}")
+    elif simpul.warna == "Hijau":
+        st.success(f"🟢 LAMPU {simpul.warna.upper()}")
 
-        bantu = bantu.next
+    st.metric("Sisa Waktu", f"{st.session_state.waktu} detik")
+
+    if st.button("Reset Simulasi"):
+        st.session_state.simpul_aktif = inisialisasi_list()
+        st.session_state.waktu = st.session_state.simpul_aktif.durasi
+        st.rerun()
+
+    time.sleep(1)
+
+    if st.session_state.waktu > 1:
+        st.session_state.waktu -= 1
+    else:
+        st.session_state.simpul_aktif = simpul.next
+        st.session_state.waktu = simpul.next.durasi
+
+    st.rerun()
+
+if __name__ == "__main__":
+    main()
